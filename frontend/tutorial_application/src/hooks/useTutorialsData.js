@@ -25,4 +25,4 @@ const useTutorialsData = () => {
   return [tutorialData, fetchTutorialData];
 }
 
-export default useTutorialsData;
+export default useTutorialsData
