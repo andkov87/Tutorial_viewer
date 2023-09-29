@@ -1,6 +1,6 @@
 import Navbar from './Navbar'
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useTutorialsData from '../hooks/useTutorialsData.js';
 import { useTutorialContext } from '../hooks/TutorialContext'
 import axiosInstance from '../AxiosConfig';
@@ -11,6 +11,8 @@ const MainPage = () => {
 
     const [tutorialData, fetchTutorialData] = useTutorialsData();
     const { selectedTutorial, setSelectedTutorial } = useTutorialContext();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredTutorials, setFilteredTutorials] = useState([]);
 
 
     const handleItemClick = (tutorial) => {
@@ -34,6 +36,16 @@ const MainPage = () => {
         }
     }
 
+    const handleInputChange = (e) => {
+        setSearchTerm(e.target.value);
+    }
+
+    const handleSearch = () => {
+        const filteredTutorials = tutorialData.filter((tutorial) => {
+            return tutorial.title.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+        setFilteredTutorials(filteredTutorials);
+    };
 
     return (
         <>
@@ -46,11 +58,13 @@ const MainPage = () => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Search by title"
-                            /*value={searchTitle}*/ />
+                                value={searchTerm}
+                                onChange={handleInputChange} />
                             <div className="input-group-append">
                                 <button
                                     className="btn btn-outline-secondary"
-                                    type="button">Search</button>
+                                    type="button"
+                                    onClick={handleSearch}>Search</button>
                             </div>
                         </div>
                     </div>
@@ -59,18 +73,35 @@ const MainPage = () => {
                             <h4 className='mb-4'>Tutorials List</h4>
 
                             <ul className="list-group">
-                                {tutorialData && tutorialData.length > 0 ? (
-                                    tutorialData.map((tutorial) => (
-                                        <li className={`list-group-item ${selectedTutorial && selectedTutorial.id === tutorial.id ? 'active' : ''} `}
-                                            key={tutorial.id}
-                                            onClick={() => handleItemClick(tutorial)}>
-                                            {tutorial.title}
-                                        </li>
-                                    ))
-                                ) : (
-                                    <li className="list-group-item">No tutorials available</li>
-                                )}
-                            </ul>
+    {filteredTutorials.length > 0 
+        ? (
+            filteredTutorials.map((tutorial) => (
+                <li
+                    className={`list-group-item ${selectedTutorial && selectedTutorial.id === tutorial.id ? 'active' : ''}`}
+                    key={tutorial.id}
+                    onClick={() => handleItemClick(tutorial)}
+                >
+                    {tutorial.title}
+                </li>
+            ))
+        )
+        : (
+            tutorialData && tutorialData.length > 0 
+                ? (
+                    tutorialData.map((tutorial) => (
+                        <li
+                            className={`list-group-item ${selectedTutorial && selectedTutorial.id === tutorial.id ? 'active' : ''}`}
+                            key={tutorial.id}
+                            onClick={() => handleItemClick(tutorial)}
+                        >
+                            {tutorial.title}
+                        </li>
+                    ))
+                )
+                : <li className="list-group-item">No tutorials available</li>
+        )
+    }
+</ul>
 
                             <button className="m-3 btn btn-sm btn-danger"
                                 onClick={hadleDeleteTutorial}>Remove All</button>
